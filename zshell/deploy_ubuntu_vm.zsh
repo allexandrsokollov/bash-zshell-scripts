@@ -317,3 +317,19 @@ for ((i=1; i<=VM_COUNT; i++)); do
   ip="${VM_IPS[$name]}"
   echo "  ${MAC_IP}:${port} -> ${name}:${ip}:22"
 done
+
+echo
+echo "VM status summary:"
+printf "%-22s %-10s %-16s %s\n" "Name" "State" "IPv4" "Image"
+for ((i=1; i<=VM_COUNT; i++)); do
+  name="$(vm_name "$i")"
+  state="$(multipass info "$name" | awk -F': ' '/^State/{print $2; exit}')"
+  ip="$(multipass info "$name" | awk '/IPv4/{print $2; exit}')"
+  image="$(multipass info "$name" | awk -F': ' '/^Release/{print $2; exit}')"
+
+  [[ -n "${state:-}" ]] || state="unknown"
+  [[ -n "${ip:-}" ]] || ip="n/a"
+  [[ -n "${image:-}" ]] || image="n/a"
+
+  printf "%-22s %-10s %-16s %s\n" "$name" "$state" "$ip" "$image"
+done
